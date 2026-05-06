@@ -93,17 +93,6 @@ Environment variables from `.env` are automatically loaded via `metro.config.js`
 
 **Prerequisites**: Android SDK, NDK 27.1, and build-tools installed. Set `ANDROID_HOME` in your shell.
 
-### Build APK (Cloud)
-
-Alternatively, use Expo's cloud build service (requires free [Expo account](https://expo.dev)):
-
-```bash
-npm install -g eas-cli
-eas login
-eas secret:create --name EXPO_PUBLIC_API_BASE --value "http://your-api-host:3000"
-eas build --platform android --profile preview
-```
-
 ## Tech Stack
 
 - React Native + Expo SDK 54
