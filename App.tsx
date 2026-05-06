@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { View, Modal, TouchableOpacity, Text, StyleSheet, BackHandler } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import * as SecureStore from 'expo-secure-store';
@@ -61,26 +62,26 @@ export default function App() {
     player.play(song, queue);
   };
 
-  if (loading) return <View style={styles.container} />;
+  if (loading) return <SafeAreaProvider><View style={styles.container} /></SafeAreaProvider>;
 
   if (!loggedIn) {
     return (
-      <View style={styles.container}>
+      <SafeAreaProvider><View style={styles.container}>
         <StatusBar style="light" />
         <LoginScreen onLogin={handleLogin} />
-      </View>
+      </View></SafeAreaProvider>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaProvider><View style={styles.container}>
       <StatusBar style="light" />
 
       <View style={[styles.content, tab !== 'search' && { display: 'none' }]}>
         <SearchScreen onPlay={handlePlay} currentHash={player.current?.hash} />
       </View>
       <View style={[styles.content, tab !== 'library' && { display: 'none' }]}>
-        <LibraryScreen onPlay={handlePlay} currentHash={player.current?.hash} />
+        <LibraryScreen onPlay={handlePlay} currentHash={player.current?.hash} currentAlbumAudioId={player.current?.albumAudioId} />
       </View>
 
       <MiniPlayer
@@ -150,7 +151,7 @@ export default function App() {
           />
         )}
       </Modal>
-    </View>
+    </View></SafeAreaProvider>
   );
 }
 

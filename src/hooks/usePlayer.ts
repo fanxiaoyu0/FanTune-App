@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { Audio } from 'expo-av';
-import { Song, LyricLine, getSongUrl, getLyric, getSongClimax, submitPlayHistory } from '../api/music';
-import { getCachedAudioUri } from '../api/audioCache';
+import { Song, LyricLine, getSongUrl, getLyric, getSongClimax, submitPlayHistory, getAiRecommend } from '../api/music';
+import { getCachedUri, cacheInBackground } from '../api/audioCache';
 
 export type PlayState = 'idle' | 'loading' | 'playing' | 'paused';
 export type PlayMode = 'loop' | 'one' | 'shuffle';
@@ -47,7 +47,9 @@ export function usePlayer() {
       playsInSilentModeIOS: true,
     });
 
-    const audioUri = await getCachedAudioUri(song.hash, q || quality, songUrl.url);
+    const cached = await getCachedUri(song.hash, q || quality);
+    const audioUri = cached || songUrl.url;
+    if (!cached) cacheInBackground(song.hash, q || quality, songUrl.url);
 
     const { sound } = await Audio.Sound.createAsync(
       { uri: audioUri },

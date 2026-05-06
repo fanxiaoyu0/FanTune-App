@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, BackHandler } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../theme/colors';
 import { ProgressBar } from '../components/ProgressBar';
@@ -53,6 +54,8 @@ export function PlayerScreen({
   onPause, onResume, onSeek, onNext, onPrev,
   onTogglePlayMode, onSetQuality, onClose, onArtistPress,
 }: Props) {
+  const insets = useSafeAreaInsets();
+
   useEffect(() => {
     const handler = BackHandler.addEventListener('hardwareBackPress', () => {
       onClose();
@@ -79,7 +82,7 @@ export function PlayerScreen({
         )}
       </View>
 
-      <View style={styles.bottom}>
+      <View style={[styles.bottom, { paddingBottom: Math.max(insets.bottom, 12) }]}>
         <View style={styles.songRow}>
           <View style={styles.songInfo}>
             <Text style={styles.title} numberOfLines={1}>{title}</Text>
@@ -118,12 +121,12 @@ export function PlayerScreen({
 
         <View style={styles.controls}>
           <TouchableOpacity onPress={onTogglePlayMode} style={styles.sideBtn} activeOpacity={0.6}>
-            <Ionicons name={modeConfig.icon} size={22} color={colors.textSecondary} />
+            <Ionicons name={modeConfig.icon} size={20} color={colors.textSecondary} />
             {playMode === 'one' && <Text style={styles.oneLabel}>1</Text>}
           </TouchableOpacity>
 
           <TouchableOpacity onPress={onPrev} style={styles.ctrlBtn} activeOpacity={0.6}>
-            <Ionicons name="play-skip-back" size={26} color={colors.text} />
+            <Ionicons name="play-skip-back" size={24} color={colors.text} />
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -132,21 +135,19 @@ export function PlayerScreen({
             activeOpacity={0.7}
           >
             {state === 'loading' ? (
-              <Ionicons name="hourglass-outline" size={30} color={colors.bg} />
+              <Ionicons name="hourglass-outline" size={24} color={colors.bg} />
             ) : state === 'playing' ? (
-              <Ionicons name="pause" size={30} color={colors.bg} />
+              <Ionicons name="pause" size={24} color={colors.bg} />
             ) : (
-              <Ionicons name="play" size={30} color={colors.bg} />
+              <Ionicons name="play" size={24} color={colors.bg} />
             )}
           </TouchableOpacity>
 
           <TouchableOpacity onPress={onNext} style={styles.ctrlBtn} activeOpacity={0.6}>
-            <Ionicons name="play-skip-forward" size={26} color={colors.text} />
+            <Ionicons name="play-skip-forward" size={24} color={colors.text} />
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={onClose} style={styles.sideBtn} activeOpacity={0.6}>
-            <Ionicons name="chevron-down" size={22} color={colors.textSecondary} />
-          </TouchableOpacity>
+          <View style={styles.sideBtn} />
         </View>
       </View>
     </View>
@@ -169,7 +170,7 @@ const styles = StyleSheet.create({
   },
   bottom: {
     paddingHorizontal: 28,
-    paddingBottom: 40,
+    paddingBottom: 16,
   },
   songRow: {
     flexDirection: 'row',
@@ -253,9 +254,9 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   playBtn: {
-    width: 58,
-    height: 58,
-    borderRadius: 29,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     backgroundColor: colors.text,
     justifyContent: 'center',
     alignItems: 'center',

@@ -142,16 +142,20 @@ export async function getStyleTags(): Promise<StyleTag[]> {
 
 export async function getAiRecommend(albumAudioId: string): Promise<Song[]> {
   const res = await api('/ai/recommend', { album_audio_id: albumAudioId });
-  const songs = res?.data?.info || res?.data || [];
+  const songs = res?.data?.song_list || res?.data?.info || [];
   if (!Array.isArray(songs)) return [];
-  return songs.map((s: any) => ({
-    hash: s.hash || s.Hash || '',
-    fileName: s.filename || s.FileName || s.name || '',
-    albumAudioId: String(s.album_audio_id || s.mixsongid || ''),
-    duration: s.duration || s.Duration || 0,
-    albumId: String(s.album_id || ''),
-    imgUrl: '',
-  }));
+  return songs.map((s: any) => {
+    const singer = s.author_name || '';
+    const name = s.songname || s.filename || '';
+    return {
+      hash: s.hash || '',
+      fileName: singer && name ? `${singer} - ${name}` : name || singer,
+      albumAudioId: String(s.album_audio_id || s.mixsongid || ''),
+      duration: 0,
+      albumId: String(s.album_id || ''),
+      imgUrl: '',
+    };
+  });
 }
 
 export async function getSongClimax(hash: string): Promise<number | null> {
@@ -214,17 +218,23 @@ export async function getAlbumSongs(albumId: string): Promise<{ name: string; so
     api('/album/detail', { id: albumId }).catch(() => null),
     api('/album/songs', { id: albumId, pagesize: 50 }),
   ]);
-  const songs = songsRes?.data?.info || [];
+  const songs = songsRes?.data?.songs || songsRes?.data?.info || [];
   return {
     name: detailRes?.data?.albumname || '',
-    songs: songs.map((s: any) => ({
-      hash: s.hash || '',
-      fileName: s.filename || '',
-      albumAudioId: String(s.album_audio_id || ''),
-      duration: s.duration || 0,
-      albumId: albumId,
-      imgUrl: '',
-    })),
+    songs: songs.map((s: any) => {
+      const base = s.base || {};
+      const info = s.audio_info || {};
+      const name = base.audio_name || s.audio_name || s.filename || '';
+      const singer = base.author_name || (s.authors?.[0]?.author_name) || '';
+      return {
+        hash: info.hash || s.hash || '',
+        fileName: singer && name ? `${singer} - ${name}` : name,
+        albumAudioId: String(base.album_audio_id || s.album_audio_id || ''),
+        duration: Math.round((info.duration || s.duration || 0) / 1000),
+        albumId: albumId,
+        imgUrl: '',
+      };
+    }),
   };
 }
 

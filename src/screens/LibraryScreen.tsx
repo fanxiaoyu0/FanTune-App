@@ -2,16 +2,17 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, FlatList, TouchableOpacity, ScrollView, StyleSheet, ActivityIndicator, BackHandler } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../theme/colors';
-import { getUserPlaylists, getPlaylistTracks, getUserHistory, getStyleRecommend, getStyleTags, Playlist, Song, StyleTag } from '../api/music';
+import { getUserPlaylists, getPlaylistTracks, getUserHistory, getStyleRecommend, getStyleTags, getAiRecommend, Playlist, Song, StyleTag } from '../api/music';
 
-type SubPage = { type: 'playlist'; playlist: Playlist } | { type: 'history' } | { type: 'style'; tag?: StyleTag };
+type SubPage = { type: 'playlist'; playlist: Playlist } | { type: 'history' } | { type: 'style'; tag?: StyleTag } | { type: 'ai' };
 
 interface Props {
   onPlay: (song: Song, queue: Song[]) => void;
   currentHash?: string;
+  currentAlbumAudioId?: string;
 }
 
-export function LibraryScreen({ onPlay, currentHash }: Props) {
+export function LibraryScreen({ onPlay, currentHash, currentAlbumAudioId }: Props) {
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [styleTags, setStyleTags] = useState<StyleTag[]>([]);
   const [subPage, setSubPage] = useState<SubPage | null>(null);
@@ -47,6 +48,14 @@ export function LibraryScreen({ onPlay, currentHash }: Props) {
     setLoadingTracks(false);
   };
 
+  const openAiRecommend = async () => {
+    if (!currentAlbumAudioId) return;
+    setSubPage({ type: 'ai' });
+    setLoadingTracks(true);
+    setTracks(await getAiRecommend(currentAlbumAudioId));
+    setLoadingTracks(false);
+  };
+
   const openStyle = async (tag?: StyleTag) => {
     setSubPage({ type: 'style', tag });
     setLoadingTracks(true);
@@ -73,6 +82,7 @@ export function LibraryScreen({ onPlay, currentHash }: Props) {
   if (subPage) {
     const title = subPage.type === 'playlist' ? subPage.playlist.name
       : subPage.type === 'history' ? '最近播放'
+      : subPage.type === 'ai' ? '猜你喜欢'
       : subPage.tag ? subPage.tag.name : '风格推荐';
 
     return (
@@ -137,6 +147,16 @@ export function LibraryScreen({ onPlay, currentHash }: Props) {
               <Text style={styles.menuText}>最近播放</Text>
               <Ionicons name="chevron-forward" size={18} color={colors.textTertiary} />
             </TouchableOpacity>
+
+            {currentAlbumAudioId && (
+              <TouchableOpacity style={styles.menuRow} onPress={openAiRecommend} activeOpacity={0.6}>
+                <View style={[styles.menuIcon, { backgroundColor: '#1a1a2a' }]}>
+                  <Ionicons name="sparkles-outline" size={20} color={colors.accent} />
+                </View>
+                <Text style={styles.menuText}>猜你喜欢</Text>
+                <Ionicons name="chevron-forward" size={18} color={colors.textTertiary} />
+              </TouchableOpacity>
+            )}
 
             <TouchableOpacity style={styles.menuRow} onPress={() => openStyle()} activeOpacity={0.6}>
               <View style={[styles.menuIcon, { backgroundColor: '#2a1a2a' }]}>
