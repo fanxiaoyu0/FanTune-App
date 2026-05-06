@@ -37,7 +37,7 @@ src/
 │   ├── auth.ts          # Login, token refresh
 │   └── audioCache.ts    # Stream-first local caching
 ├── components/
-│   ├── ProgressBar.tsx   # Draggable seek bar (setNativeProps)
+│   ├── ProgressBar.tsx   # Draggable seek bar (pageX + setNativeProps)
 │   ├── MiniPlayer.tsx    # Compact bar with current lyric
 │   └── Lyrics.tsx        # Synced scroll with inline seek
 ├── hooks/
@@ -49,7 +49,7 @@ src/
 │   ├── ArtistScreen.tsx   # Artist songs
 │   └── LoginScreen.tsx    # Phone SMS login
 └── theme/
-    └── colors.ts          # Dark violet design tokens
+    └── colors.ts          # Dark violet design tokens (WCAG AA compliant)
 ```
 
 ## Setup

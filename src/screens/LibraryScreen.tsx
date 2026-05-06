@@ -145,16 +145,16 @@ export function LibraryScreen({ onPlay, currentHash, currentAlbumAudioId }: Prop
         ) : (
           <>
             <TouchableOpacity style={styles.menuRow} onPress={openHistory} activeOpacity={0.6}>
-              <View style={[styles.menuIcon, { backgroundColor: '#1a2a1a' }]}>
-                <Ionicons name="time-outline" size={20} color={colors.playing} />
+              <View style={[styles.menuIcon, { backgroundColor: '#1a1a2e' }]}>
+                <Ionicons name="time-outline" size={20} color={colors.accent} />
               </View>
               <Text style={styles.menuText}>最近播放</Text>
               <Ionicons name="chevron-forward" size={18} color={colors.textTertiary} />
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.menuRow} onPress={openAiRecommend} activeOpacity={0.6}>
-              <View style={[styles.menuIcon, { backgroundColor: '#1a1a2a' }]}>
-                <Ionicons name="sparkles-outline" size={20} color={colors.accent} />
+              <View style={[styles.menuIcon, { backgroundColor: '#1e1a30' }]}>
+                <Ionicons name="sparkles-outline" size={20} color="#a78bfa" />
               </View>
               <Text style={styles.menuText}>猜你喜欢</Text>
               <Ionicons name="chevron-forward" size={18} color={colors.textTertiary} />
@@ -179,10 +179,12 @@ export function LibraryScreen({ onPlay, currentHash, currentAlbumAudioId }: Prop
             )}
 
             <Text style={styles.sectionTitle}>我的歌单</Text>
-            {playlists.map(p => (
+            {playlists.map(p => {
+              const hue = Array.from(p.gcid).reduce((s, c) => s + c.charCodeAt(0), 0) % 60 + 240;
+              return (
               <TouchableOpacity key={p.gcid} style={styles.playlistRow} onPress={() => openPlaylist(p)} activeOpacity={0.6}>
-                <View style={styles.playlistIcon}>
-                  <Ionicons name="musical-notes-outline" size={18} color={colors.textSecondary} />
+                <View style={[styles.playlistIcon, { backgroundColor: `hsl(${hue}, 30%, 18%)` }]}>
+                  <Text style={{ fontSize: 18, fontWeight: '700', color: `hsl(${hue}, 60%, 70%)` }}>{p.name.slice(0, 1)}</Text>
                 </View>
                 <View style={styles.playlistInfo}>
                   <Text style={styles.playlistName} numberOfLines={1}>{p.name}</Text>
@@ -190,7 +192,8 @@ export function LibraryScreen({ onPlay, currentHash, currentAlbumAudioId }: Prop
                 </View>
                 <Ionicons name="chevron-forward" size={18} color={colors.textTertiary} />
               </TouchableOpacity>
-            ))}
+              );
+            })}
           </>
         )}
       </ScrollView>
@@ -200,7 +203,7 @@ export function LibraryScreen({ onPlay, currentHash, currentAlbumAudioId }: Prop
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
-  topBar: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 20 },
+  topBar: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 8 },
   topTitle: { fontSize: 30, fontWeight: '800', color: colors.text },
   menuRow: {
     flexDirection: 'row',
@@ -223,9 +226,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 9,
     borderRadius: 20,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
+    backgroundColor: 'rgba(124, 109, 240, 0.08)',
   },
   tagText: { fontSize: 13, color: colors.textSecondary },
   sectionTitle: {

@@ -10,32 +10,43 @@ interface Props {
 }
 
 export function ProgressBar({ progress, onSeek, height = 4, fillColor }: Props) {
-  const widthRef = useRef(0);
+  const trackRef = useRef<View>(null);
+  const layoutRef = useRef({ x: 0, width: 0 });
   const draggingRef = useRef(false);
+  const seekingRef = useRef(false);
   const fillRef = useRef<View>(null);
   const thumbRef = useRef<View>(null);
 
   useEffect(() => {
-    if (!draggingRef.current) {
-      fillRef.current?.setNativeProps({ style: { width: `${Math.max(0, Math.min(1, progress)) * 100}%` } });
+    if (!draggingRef.current && !seekingRef.current) {
+      fillRef.current?.setNativeProps({
+        style: { width: `${Math.max(0, Math.min(1, progress)) * 100}%` },
+      });
     }
   }, [progress]);
 
   const applyVisual = (ratio: number) => {
     const clamped = Math.max(0, Math.min(1, ratio));
-    fillRef.current?.setNativeProps({ style: { width: `${clamped * 100}%` } });
-    thumbRef.current?.setNativeProps({ style: { left: `${clamped * 100}%`, opacity: 1 } });
+    const pct = `${clamped * 100}%`;
+    fillRef.current?.setNativeProps({ style: { width: pct } });
+    thumbRef.current?.setNativeProps({ style: { left: pct, opacity: 1 } });
   };
 
   const getRatio = (e: GestureResponderEvent) => {
-    if (widthRef.current <= 0) return 0;
-    return Math.max(0, Math.min(1, e.nativeEvent.locationX / widthRef.current));
+    const { x, width } = layoutRef.current;
+    if (width <= 0) return 0;
+    return Math.max(0, Math.min(1, (e.nativeEvent.pageX - x) / width));
   };
 
   return (
     <View
+      ref={trackRef}
       style={styles.touchArea}
-      onLayout={(e) => { widthRef.current = e.nativeEvent.layout.width; }}
+      onLayout={() => {
+        trackRef.current?.measureInWindow((x, _y, width) => {
+          layoutRef.current = { x, width };
+        });
+      }}
       onStartShouldSetResponder={() => true}
       onMoveShouldSetResponder={() => true}
       onResponderGrant={(e) => {
@@ -48,8 +59,10 @@ export function ProgressBar({ progress, onSeek, height = 4, fillColor }: Props) 
       onResponderRelease={(e) => {
         const ratio = getRatio(e);
         draggingRef.current = false;
+        seekingRef.current = true;
         onSeek(ratio);
         thumbRef.current?.setNativeProps({ style: { opacity: 0 } });
+        setTimeout(() => { seekingRef.current = false; }, 800);
       }}
     >
       <View style={[styles.track, { height }]}>
