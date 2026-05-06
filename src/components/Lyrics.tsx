@@ -24,6 +24,7 @@ export function Lyrics({ lyrics, position, onSeek }: Props) {
   const lastIndexRef = useRef(-1);
   const [userScrolling, setUserScrolling] = useState(false);
   const [seekIndex, setSeekIndex] = useState(-1);
+  const [overrideIndex, setOverrideIndex] = useState(-1);
   const userScrollTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const activeIndex = useMemo(() => {
@@ -35,14 +36,22 @@ export function Lyrics({ lyrics, position, onSeek }: Props) {
   }, [lyrics, position]);
 
   useEffect(() => {
-    if (!userScrolling && activeIndex !== lastIndexRef.current && activeIndex >= 0) {
-      lastIndexRef.current = activeIndex;
+    if (overrideIndex >= 0 && activeIndex === overrideIndex) {
+      setOverrideIndex(-1);
+    }
+  }, [activeIndex, overrideIndex]);
+
+  const displayIndex = overrideIndex >= 0 ? overrideIndex : activeIndex;
+
+  useEffect(() => {
+    if (!userScrolling && displayIndex !== lastIndexRef.current && displayIndex >= 0) {
+      lastIndexRef.current = displayIndex;
       scrollRef.current?.scrollTo({
-        y: activeIndex * LINE_HEIGHT,
+        y: displayIndex * LINE_HEIGHT,
         animated: true,
       });
     }
-  }, [activeIndex, userScrolling]);
+  }, [displayIndex, userScrolling]);
 
   const onScrollBegin = useCallback(() => {
     setUserScrolling(true);
@@ -66,10 +75,11 @@ export function Lyrics({ lyrics, position, onSeek }: Props) {
 
   const handleSeek = useCallback(() => {
     if (seekIndex >= 0 && seekIndex < lyrics.length && onSeek) {
+      setOverrideIndex(seekIndex);
       onSeek(lyrics[seekIndex].time);
       setSeekIndex(-1);
+      setUserScrolling(false);
       if (userScrollTimer.current) clearTimeout(userScrollTimer.current);
-      setTimeout(() => setUserScrolling(false), 500);
     }
   }, [seekIndex, lyrics, onSeek]);
 
@@ -94,7 +104,7 @@ export function Lyrics({ lyrics, position, onSeek }: Props) {
       scrollEventThrottle={32}
     >
       {lyrics.map((line, i) => {
-        const isActive = i === activeIndex && !userScrolling;
+        const isActive = i === displayIndex && !userScrolling;
         const isSeekTarget = userScrolling && i === seekIndex;
 
         if (isSeekTarget) {

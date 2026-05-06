@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../theme/colors';
 import { PlayState } from '../hooks/usePlayer';
-import { Song } from '../api/music';
+import { Song, LyricLine } from '../api/music';
 import { ProgressBar } from './ProgressBar';
 
 interface Props {
@@ -11,6 +11,7 @@ interface Props {
   state: PlayState;
   position: number;
   duration: number;
+  lyrics: LyricLine[];
   onPause: () => void;
   onResume: () => void;
   onSeek: (ms: number) => void;
@@ -23,11 +24,19 @@ function parseName(fileName: string) {
   return { artist: parts[0] || '', title: parts[1] || fileName };
 }
 
-export function MiniPlayer({ song, state, position, duration, onPause, onResume, onSeek, onPress, onNext }: Props) {
+export function MiniPlayer({ song, state, position, duration, lyrics, onPause, onResume, onSeek, onPress, onNext }: Props) {
   if (!song || state === 'idle') return null;
 
   const { artist, title } = parseName(song.fileName);
   const progress = duration > 0 ? position / duration : 0;
+
+  const currentLyric = useMemo(() => {
+    if (lyrics.length === 0) return '';
+    for (let i = lyrics.length - 1; i >= 0; i--) {
+      if (position >= lyrics[i].time) return lyrics[i].text;
+    }
+    return '';
+  }, [lyrics, position]);
 
   return (
     <View style={styles.wrapper}>
@@ -40,7 +49,9 @@ export function MiniPlayer({ song, state, position, duration, onPause, onResume,
       <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.8}>
         <View style={styles.info}>
           <Text style={styles.title} numberOfLines={1}>{title}</Text>
-          <Text style={styles.artist} numberOfLines={1}>{artist}</Text>
+          <Text style={styles.lyric} numberOfLines={1}>
+            {currentLyric || artist}
+          </Text>
         </View>
         <TouchableOpacity
           onPress={state === 'playing' ? onPause : onResume}
@@ -66,7 +77,7 @@ export function MiniPlayer({ song, state, position, duration, onPause, onResume,
 const styles = StyleSheet.create({
   wrapper: {
     position: 'absolute',
-    bottom: 0,
+    bottom: 80,
     left: 0,
     right: 0,
     backgroundColor: colors.surface,
@@ -78,10 +89,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 12,
-    paddingBottom: 28,
   },
   info: { flex: 1 },
   title: { fontSize: 15, color: colors.text, fontWeight: '500' },
-  artist: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
+  lyric: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
   btn: { padding: 8 },
 });

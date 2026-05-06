@@ -14,17 +14,20 @@ KuGou Music's official app is bloated with ads, social features, and pop-ups. Fa
 - **Progress Control** — Draggable progress bar with tap-to-jump
 - **Auth** — Phone SMS login, token auto-refresh, secure storage
 
-### Planned
+### Discovery & Library
 
-- Search suggestions (autocomplete)
-- Quality selection UI (128/320/FLAC switch)
-- My playlists (synced from KuGou)
-- Playlist management (create/edit/add/remove)
-- Play history
-- Style-based & AI song recommendations
-- Artist & album detail pages
-- Song comments
-- Song climax (jump to highlight)
+- **Search suggestions** — Autocomplete as you type
+- **My playlists** — Synced from KuGou account
+- **Play history** — Recent listening history
+- **Style recommendations** — Browse by genre/mood/language tags
+- **Song comments** — View hot comments in player
+- **Artist page** — Tap artist name to see all songs
+- **Song climax** — One-tap jump to the chorus
+
+### Audio
+
+- **Quality selection** — Switch between 128/320/FLAC in player
+- **Play history sync** — Listening data synced back to KuGou
 
 ## Architecture
 

@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
 import { Audio } from 'expo-av';
-import { Song, LyricLine, getSongUrl, getLyric } from '../api/music';
+import { Song, LyricLine, getSongUrl, getLyric, getSongClimax, submitPlayHistory } from '../api/music';
 
 export type PlayState = 'idle' | 'loading' | 'playing' | 'paused';
 export type PlayMode = 'loop' | 'one' | 'shuffle';
@@ -16,6 +16,7 @@ export function usePlayer() {
   const [playMode, setPlayMode] = useState<PlayMode>('loop');
   const [quality, setQualityState] = useState<string>('320');
   const [lyrics, setLyrics] = useState<LyricLine[]>([]);
+  const [climax, setClimax] = useState<number | null>(null);
 
   const queueRef = useRef(queue);
   const queueIndexRef = useRef(queueIndex);
@@ -28,6 +29,7 @@ export function usePlayer() {
     setState('loading');
     setCurrent(song);
     setLyrics([]);
+    setClimax(null);
 
     if (soundRef.current) {
       await soundRef.current.unloadAsync();
@@ -63,6 +65,8 @@ export function usePlayer() {
     setState('playing');
 
     getLyric(song.hash, song.albumAudioId).then(setLyrics);
+    getSongClimax(song.hash).then(setClimax);
+    if (song.albumAudioId) submitPlayHistory(song.albumAudioId);
   }, [quality]);
 
   const handleTrackEnd = useCallback(() => {
@@ -165,12 +169,48 @@ export function usePlayer() {
     });
   }, []);
 
-  const setQuality = useCallback((q: string) => {
+  const setQuality = useCallback(async (q: string) => {
     setQualityState(q);
-  }, []);
+    const song = queueRef.current[queueIndexRef.current];
+    if (!song) return;
+
+    const oldSound = soundRef.current;
+    let currentPos = 0;
+    if (oldSound) {
+      const status = await oldSound.getStatusAsync();
+      currentPos = status.isLoaded ? status.positionMillis : 0;
+    }
+
+    const songUrl = await getSongUrl(song.hash, song.albumAudioId, q);
+    if (!songUrl) return;
+
+    await Audio.setAudioModeAsync({ staysActiveInBackground: true, playsInSilentModeIOS: true });
+    if (oldSound) {
+      const freshStatus = await oldSound.getStatusAsync();
+      if (freshStatus.isLoaded) currentPos = freshStatus.positionMillis;
+    }
+
+    const { sound: newSound } = await Audio.Sound.createAsync(
+      { uri: songUrl.url },
+      { shouldPlay: true, positionMillis: currentPos, progressUpdateIntervalMillis: 500 },
+      (status) => {
+        if (!status.isLoaded) return;
+        setPosition(status.positionMillis);
+        setDuration(status.durationMillis || 0);
+        if (status.didJustFinish) handleTrackEnd();
+        else if (status.isPlaying) setState('playing');
+      }
+    );
+
+    soundRef.current = newSound;
+    if (oldSound) {
+      await oldSound.stopAsync().catch(() => {});
+      await oldSound.unloadAsync().catch(() => {});
+    }
+  }, [handleTrackEnd]);
 
   return {
-    state, current, position, duration, lyrics,
+    state, current, position, duration, lyrics, climax,
     queue, queueIndex, playMode, quality,
     play, pause, resume, seek,
     next, prev, togglePlayMode, setQuality,

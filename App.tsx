@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react';
-import { View, Modal, StyleSheet } from 'react-native';
+import { View, Modal, TouchableOpacity, Text, StyleSheet, BackHandler } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { Ionicons } from '@expo/vector-icons';
 import * as SecureStore from 'expo-secure-store';
 import { setAuth, clearAuth, setOnAuthExpired } from './src/api/client';
 import { refreshToken } from './src/api/auth';
 import { usePlayer } from './src/hooks/usePlayer';
 import { SearchScreen } from './src/screens/SearchScreen';
+import { LibraryScreen } from './src/screens/LibraryScreen';
 import { PlayerScreen } from './src/screens/PlayerScreen';
 import { LoginScreen } from './src/screens/LoginScreen';
+import { ArtistScreen } from './src/screens/ArtistScreen';
 import { MiniPlayer } from './src/components/MiniPlayer';
 import { Song } from './src/api/music';
 import { LoginResult } from './src/api/auth';
@@ -16,11 +19,15 @@ import { colors } from './src/theme/colors';
 const TOKEN_KEY = 'kugou_token';
 const USERID_KEY = 'kugou_userid';
 
+type Tab = 'search' | 'library';
+
 export default function App() {
   const player = usePlayer();
   const [playerVisible, setPlayerVisible] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState<Tab>('search');
+  const [artistName, setArtistName] = useState<string | null>(null);
 
   const handleLogout = async () => {
     await SecureStore.deleteItemAsync(TOKEN_KEY);
@@ -68,12 +75,21 @@ export default function App() {
   return (
     <View style={styles.container}>
       <StatusBar style="light" />
-      <SearchScreen onPlay={handlePlay} currentHash={player.current?.hash} />
+
+      <View style={styles.content}>
+        {tab === 'search' ? (
+          <SearchScreen onPlay={handlePlay} currentHash={player.current?.hash} />
+        ) : (
+          <LibraryScreen onPlay={handlePlay} currentHash={player.current?.hash} />
+        )}
+      </View>
+
       <MiniPlayer
         song={player.current}
         state={player.state}
         position={player.position}
         duration={player.duration}
+        lyrics={player.lyrics}
         onPause={player.pause}
         onResume={player.resume}
         onSeek={player.seek}
@@ -81,11 +97,23 @@ export default function App() {
         onNext={player.next}
       />
 
+      <View style={styles.tabBar}>
+        <TouchableOpacity style={styles.tabItem} onPress={() => setTab('search')} activeOpacity={0.6}>
+          <Ionicons name="search" size={22} color={tab === 'search' ? colors.text : colors.textTertiary} />
+          <Text style={[styles.tabLabel, tab === 'search' && styles.tabLabelActive]}>搜索</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.tabItem} onPress={() => setTab('library')} activeOpacity={0.6}>
+          <Ionicons name="library-outline" size={22} color={tab === 'library' ? colors.text : colors.textTertiary} />
+          <Text style={[styles.tabLabel, tab === 'library' && styles.tabLabelActive]}>音乐库</Text>
+        </TouchableOpacity>
+      </View>
+
       <Modal
         visible={playerVisible}
         animationType="slide"
         presentationStyle="fullScreen"
         statusBarTranslucent
+        onRequestClose={() => setPlayerVisible(false)}
       >
         <PlayerScreen
           song={player.current}
@@ -93,6 +121,7 @@ export default function App() {
           position={player.position}
           duration={player.duration}
           lyrics={player.lyrics}
+          climax={player.climax}
           playMode={player.playMode}
           quality={player.quality}
           onPause={player.pause}
@@ -101,8 +130,26 @@ export default function App() {
           onNext={player.next}
           onPrev={player.prev}
           onTogglePlayMode={player.togglePlayMode}
+          onSetQuality={player.setQuality}
           onClose={() => setPlayerVisible(false)}
+          onArtistPress={(name) => { setPlayerVisible(false); setArtistName(name); }}
         />
+      </Modal>
+      <Modal
+        visible={!!artistName}
+        animationType="slide"
+        presentationStyle="fullScreen"
+        statusBarTranslucent
+        onRequestClose={() => setArtistName(null)}
+      >
+        {artistName && (
+          <ArtistScreen
+            artistName={artistName}
+            onPlay={handlePlay}
+            onClose={() => setArtistName(null)}
+            currentHash={player.current?.hash}
+          />
+        )}
       </Modal>
     </View>
   );
@@ -110,4 +157,25 @@ export default function App() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
+  content: { flex: 1 },
+  tabBar: {
+    flexDirection: 'row',
+    backgroundColor: colors.surface,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    paddingBottom: 40,
+    paddingTop: 8,
+  },
+  tabItem: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 2,
+  },
+  tabLabel: {
+    fontSize: 10,
+    color: colors.textTertiary,
+  },
+  tabLabelActive: {
+    color: colors.text,
+  },
 });
