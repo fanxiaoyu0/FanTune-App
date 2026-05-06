@@ -82,7 +82,7 @@ export function PlayerScreen({
         )}
       </View>
 
-      <View style={[styles.bottom, { paddingBottom: Math.max(insets.bottom, 12) }]}>
+      <View style={[styles.bottom, { paddingBottom: Math.max(insets.bottom, 20) + 20 }]}>
         <View style={styles.songRow}>
           <View style={styles.songInfo}>
             <Text style={styles.title} numberOfLines={1}>{title}</Text>
@@ -176,17 +176,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-end',
     justifyContent: 'space-between',
-    marginBottom: 16,
+    marginBottom: 20,
   },
   songInfo: {
     flex: 1,
     marginRight: 12,
   },
   title: {
-    fontSize: 20,
-    fontWeight: '600',
+    fontSize: 22,
+    fontWeight: '700',
     color: colors.text,
-    marginBottom: 4,
+    marginBottom: 6,
   },
   artist: {
     fontSize: 14,
@@ -198,13 +198,11 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   climaxBtn: {
-    width: 26,
-    height: 22,
-    borderRadius: 4,
     borderWidth: 1,
     borderColor: '#f9731640',
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderRadius: 4,
+    paddingHorizontal: 5,
+    paddingVertical: 2,
   },
   qBadge: {
     borderWidth: 1,
@@ -226,7 +224,7 @@ const styles = StyleSheet.create({
     color: colors.bg,
   },
   progressArea: {
-    marginBottom: 20,
+    marginBottom: 28,
   },
   timeRow: {
     flexDirection: 'row',
@@ -254,9 +252,9 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   playBtn: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     backgroundColor: colors.text,
     justifyContent: 'center',
     alignItems: 'center',

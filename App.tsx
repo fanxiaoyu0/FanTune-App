@@ -81,7 +81,7 @@ export default function App() {
         <SearchScreen onPlay={handlePlay} currentHash={player.current?.hash} />
       </View>
       <View style={[styles.content, tab !== 'library' && { display: 'none' }]}>
-        <LibraryScreen onPlay={handlePlay} currentHash={player.current?.hash} currentAlbumAudioId={player.current?.albumAudioId} />
+        <LibraryScreen onPlay={handlePlay} currentHash={player.current?.hash} currentAlbumAudioId={player.current?.albumAudioId || player.current?.mixSongId} />
       </View>
 
       <MiniPlayer

@@ -5,7 +5,7 @@ import { colors } from '../theme/colors';
 import { LyricLine } from '../api/music';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
-const LINE_HEIGHT = 40;
+const LINE_HEIGHT = 44;
 const VISIBLE_CENTER = SCREEN_HEIGHT * 0.25;
 
 interface Props {
@@ -156,8 +156,8 @@ const styles = StyleSheet.create({
   },
   activeLine: {
     color: colors.text,
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 20,
+    fontWeight: '700',
   },
   seekRow: {
     flexDirection: 'row',

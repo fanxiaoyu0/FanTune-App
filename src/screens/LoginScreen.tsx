@@ -116,9 +116,9 @@ const styles = StyleSheet.create({
     marginBottom: 48,
   },
   title: {
-    fontSize: 36,
-    fontWeight: '700',
-    color: colors.text,
+    fontSize: 38,
+    fontWeight: '800',
+    color: colors.accent,
     letterSpacing: -1,
   },
   subtitle: {
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
   },
   input: {
     backgroundColor: colors.surface,
-    borderRadius: 12,
+    borderRadius: 14,
     paddingHorizontal: 16,
     paddingVertical: 16,
     fontSize: 16,
@@ -163,10 +163,10 @@ const styles = StyleSheet.create({
   },
   loginBtn: {
     backgroundColor: colors.accent,
-    borderRadius: 12,
+    borderRadius: 14,
     paddingVertical: 16,
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: 12,
   },
   loginBtnText: {
     fontSize: 16,

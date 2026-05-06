@@ -49,8 +49,11 @@ export function LibraryScreen({ onPlay, currentHash, currentAlbumAudioId }: Prop
   };
 
   const openAiRecommend = async () => {
-    if (!currentAlbumAudioId) return;
     setSubPage({ type: 'ai' });
+    if (!currentAlbumAudioId) {
+      setTracks([]);
+      return;
+    }
     setLoadingTracks(true);
     setTracks(await getAiRecommend(currentAlbumAudioId));
     setLoadingTracks(false);
@@ -110,6 +113,7 @@ export function LibraryScreen({ onPlay, currentHash, currentAlbumAudioId }: Prop
             data={tracks}
             keyExtractor={(item, i) => `${item.hash}-${i}`}
             contentContainerStyle={{ paddingBottom: 180 }}
+            ListEmptyComponent={!loadingTracks ? <Text style={{ fontSize: 14, color: colors.textTertiary, textAlign: 'center', marginTop: 60 }}>{subPage?.type === 'ai' ? '播放歌曲后推荐相似音乐' : '暂无歌曲'}</Text> : null}
             renderItem={({ item, index }) => {
               const { artist, title: t } = parseName(item.fileName);
               const isPlaying = item.hash === currentHash;
@@ -148,15 +152,13 @@ export function LibraryScreen({ onPlay, currentHash, currentAlbumAudioId }: Prop
               <Ionicons name="chevron-forward" size={18} color={colors.textTertiary} />
             </TouchableOpacity>
 
-            {currentAlbumAudioId && (
-              <TouchableOpacity style={styles.menuRow} onPress={openAiRecommend} activeOpacity={0.6}>
-                <View style={[styles.menuIcon, { backgroundColor: '#1a1a2a' }]}>
-                  <Ionicons name="sparkles-outline" size={20} color={colors.accent} />
-                </View>
-                <Text style={styles.menuText}>猜你喜欢</Text>
-                <Ionicons name="chevron-forward" size={18} color={colors.textTertiary} />
-              </TouchableOpacity>
-            )}
+            <TouchableOpacity style={styles.menuRow} onPress={openAiRecommend} activeOpacity={0.6}>
+              <View style={[styles.menuIcon, { backgroundColor: '#1a1a2a' }]}>
+                <Ionicons name="sparkles-outline" size={20} color={colors.accent} />
+              </View>
+              <Text style={styles.menuText}>猜你喜欢</Text>
+              <Ionicons name="chevron-forward" size={18} color={colors.textTertiary} />
+            </TouchableOpacity>
 
             <TouchableOpacity style={styles.menuRow} onPress={() => openStyle()} activeOpacity={0.6}>
               <View style={[styles.menuIcon, { backgroundColor: '#2a1a2a' }]}>
@@ -199,7 +201,7 @@ export function LibraryScreen({ onPlay, currentHash, currentAlbumAudioId }: Prop
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   topBar: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 20 },
-  topTitle: { fontSize: 28, fontWeight: '700', color: colors.text },
+  topTitle: { fontSize: 30, fontWeight: '800', color: colors.text },
   menuRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -207,9 +209,9 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
   },
   menuIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
+    width: 42,
+    height: 42,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 14,
@@ -218,8 +220,8 @@ const styles = StyleSheet.create({
   tagsScroll: { marginTop: 4, marginBottom: 8 },
   tagsContainer: { paddingHorizontal: 20, gap: 8 },
   tagChip: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 9,
     borderRadius: 20,
     backgroundColor: colors.surface,
     borderWidth: 1,
@@ -228,11 +230,11 @@ const styles = StyleSheet.create({
   tagText: { fontSize: 13, color: colors.textSecondary },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '700',
     color: colors.text,
     paddingHorizontal: 20,
-    paddingTop: 24,
-    paddingBottom: 12,
+    paddingTop: 28,
+    paddingBottom: 14,
   },
   playlistRow: {
     flexDirection: 'row',
@@ -241,9 +243,9 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   playlistIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
+    width: 42,
+    height: 42,
+    borderRadius: 12,
     backgroundColor: colors.surface,
     justifyContent: 'center',
     alignItems: 'center',

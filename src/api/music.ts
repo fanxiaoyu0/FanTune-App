@@ -23,7 +23,7 @@ export async function search(keywords: string, page = 1): Promise<SearchResult> 
     songs: lists.map((item: any) => ({
       hash: item.FileHash || item.Hash,
       fileName: item.FileName || '',
-      albumAudioId: item.AlbumAudioId || item.album_audio_id || '',
+      albumAudioId: String(item.AlbumAudioId || item.MixSongID || item.album_audio_id || ''),
       duration: item.Duration || 0,
       albumId: item.AlbumID || '',
       imgUrl: item.Image?.replace('{size}', '480') || '',
@@ -96,7 +96,7 @@ export async function getUserHistory(): Promise<Song[]> {
     return {
       hash: info.hash || '',
       fileName: singer && name ? `${singer} - ${name}` : name || singer,
-      albumAudioId: String(s.mxid || ''),
+      albumAudioId: String(s.mxid || info.album_audio_id || info.mixsongid || ''),
       duration: info.duration || Math.round((info.size || 0) / 16000),
       albumId: '',
       imgUrl: '',
@@ -213,30 +213,6 @@ export async function getArtistSongs(id: number, page = 1): Promise<Song[]> {
   });
 }
 
-export async function getAlbumSongs(albumId: string): Promise<{ name: string; songs: Song[] }> {
-  const [detailRes, songsRes] = await Promise.all([
-    api('/album/detail', { id: albumId }).catch(() => null),
-    api('/album/songs', { id: albumId, pagesize: 50 }),
-  ]);
-  const songs = songsRes?.data?.songs || songsRes?.data?.info || [];
-  return {
-    name: detailRes?.data?.albumname || '',
-    songs: songs.map((s: any) => {
-      const base = s.base || {};
-      const info = s.audio_info || {};
-      const name = base.audio_name || s.audio_name || s.filename || '';
-      const singer = base.author_name || (s.authors?.[0]?.author_name) || '';
-      return {
-        hash: info.hash || s.hash || '',
-        fileName: singer && name ? `${singer} - ${name}` : name,
-        albumAudioId: String(base.album_audio_id || s.album_audio_id || ''),
-        duration: Math.round((info.duration || s.duration || 0) / 1000),
-        albumId: albumId,
-        imgUrl: '',
-      };
-    }),
-  };
-}
 
 export async function searchSuggest(keywords: string): Promise<string[]> {
   if (!keywords.trim()) return [];

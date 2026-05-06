@@ -64,16 +64,19 @@ export function SearchScreen({ onPlay, currentHash }: Props) {
   return (
     <View style={styles.container}>
       <View style={styles.searchBar}>
-        <TextInput
-          style={styles.input}
-          placeholder="搜索歌曲、歌手..."
-          placeholderTextColor={colors.textTertiary}
-          value={query}
-          onChangeText={handleTextChange}
-          onSubmitEditing={() => handleSearch()}
-          returnKeyType="search"
-          onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
-        />
+        <View style={styles.inputRow}>
+          <Ionicons name="search" size={18} color={colors.textTertiary} />
+          <TextInput
+            style={styles.input}
+            placeholder="搜索歌曲、歌手..."
+            placeholderTextColor={colors.textTertiary}
+            value={query}
+            onChangeText={handleTextChange}
+            onSubmitEditing={() => handleSearch()}
+            returnKeyType="search"
+            onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+          />
+        </View>
       </View>
 
       {showSuggestions && (
@@ -124,21 +127,27 @@ export function SearchScreen({ onPlay, currentHash }: Props) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
-  searchBar: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 12 },
-  input: {
+  searchBar: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 14 },
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: colors.surface,
-    borderRadius: 12,
+    borderRadius: 14,
     paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: colors.border,
+    gap: 10,
+  },
+  input: {
+    flex: 1,
     paddingVertical: 14,
     fontSize: 16,
     color: colors.text,
-    borderWidth: 1,
-    borderColor: colors.border,
   },
   suggestionsContainer: {
     marginHorizontal: 20,
     backgroundColor: colors.surface,
-    borderRadius: 12,
+    borderRadius: 14,
     borderWidth: 1,
     borderColor: colors.border,
     overflow: 'hidden',
