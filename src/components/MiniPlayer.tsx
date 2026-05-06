@@ -76,23 +76,19 @@ export function MiniPlayer({ song, state, position, duration, lyrics, onPause, o
 
 const styles = StyleSheet.create({
   wrapper: {
-    position: 'absolute',
-    bottom: 80,
-    left: 0,
-    right: 0,
     backgroundColor: colors.surfaceLight,
-    borderTopWidth: 1,
+    borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: colors.border,
   },
   container: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 6,
-    paddingBottom: 8,
+    paddingTop: 8,
+    paddingBottom: 10,
   },
   info: { flex: 1 },
-  title: { fontSize: 14, color: colors.text, fontWeight: '500' },
-  lyric: { fontSize: 11, color: colors.textSecondary, marginTop: 1 },
+  title: { fontSize: 14, color: colors.text, fontWeight: '600' },
+  lyric: { fontSize: 12, color: colors.textSecondary, marginTop: 3 },
   btn: { padding: 8 },
 });

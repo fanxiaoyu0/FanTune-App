@@ -4,6 +4,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../theme/colors';
 import { getUserPlaylists, getPlaylistTracks, getUserHistory, getStyleRecommend, getStyleTags, getAiRecommend, Playlist, Song, StyleTag } from '../api/music';
 
+const PREFERRED_TAGS = ['民谣', '摇滚', '电子', '乡村'];
+
 type SubPage = { type: 'playlist'; playlist: Playlist } | { type: 'history' } | { type: 'style'; tag?: StyleTag } | { type: 'ai' };
 
 interface Props {
@@ -112,7 +114,7 @@ export function LibraryScreen({ onPlay, currentHash, currentAlbumAudioId }: Prop
           <FlatList
             data={tracks}
             keyExtractor={(item, i) => `${item.hash}-${i}`}
-            contentContainerStyle={{ paddingBottom: 180 }}
+            contentContainerStyle={{ paddingBottom: 24 }}
             ListEmptyComponent={!loadingTracks ? <Text style={{ fontSize: 14, color: colors.textTertiary, textAlign: 'center', marginTop: 60 }}>{subPage?.type === 'ai' ? '播放歌曲后推荐相似音乐' : '暂无歌曲'}</Text> : null}
             renderItem={({ item, index }) => {
               const { artist, title: t } = parseName(item.fileName);
@@ -135,7 +137,7 @@ export function LibraryScreen({ onPlay, currentHash, currentAlbumAudioId }: Prop
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={{ paddingBottom: 180 }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
         <View style={styles.topBar}>
           <Text style={styles.topTitle}>音乐库</Text>
         </View>
@@ -168,15 +170,18 @@ export function LibraryScreen({ onPlay, currentHash, currentAlbumAudioId }: Prop
               <Ionicons name="chevron-forward" size={18} color={colors.textTertiary} />
             </TouchableOpacity>
 
-            {styleTags.length > 0 && (
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tagsScroll} contentContainerStyle={styles.tagsContainer}>
-                {styleTags.map(tag => (
-                  <TouchableOpacity key={tag.id} style={styles.tagChip} onPress={() => openStyle(tag)} activeOpacity={0.6}>
-                    <Text style={styles.tagText}>{tag.name}</Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            )}
+            {(() => {
+              const filtered = styleTags.filter(t => PREFERRED_TAGS.includes(t.name));
+              return filtered.length > 0 ? (
+                <View style={styles.tagsRow}>
+                  {filtered.map(tag => (
+                    <TouchableOpacity key={tag.id} style={styles.tagChip} onPress={() => openStyle(tag)} activeOpacity={0.7}>
+                      <Text style={styles.tagText}>{tag.name}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              ) : null;
+            })()}
 
             <Text style={styles.sectionTitle}>我的歌单</Text>
             {playlists.map(p => {
@@ -220,15 +225,20 @@ const styles = StyleSheet.create({
     marginRight: 14,
   },
   menuText: { flex: 1, fontSize: 16, color: colors.text },
-  tagsScroll: { marginTop: 4, marginBottom: 8 },
-  tagsContainer: { paddingHorizontal: 20, gap: 8 },
-  tagChip: {
-    paddingHorizontal: 16,
-    paddingVertical: 9,
-    borderRadius: 20,
-    backgroundColor: 'rgba(124, 109, 240, 0.08)',
+  tagsRow: {
+    flexDirection: 'row',
+    paddingHorizontal: 20,
+    gap: 10,
+    marginTop: 4,
+    marginBottom: 8,
   },
-  tagText: { fontSize: 13, color: colors.textSecondary },
+  tagChip: {
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    borderRadius: 20,
+    backgroundColor: colors.accentDim,
+  },
+  tagText: { fontSize: 13, color: colors.textSecondary, fontWeight: '500' },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '700',

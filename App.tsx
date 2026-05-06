@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { View, Modal, TouchableOpacity, Text, StyleSheet, BackHandler } from 'react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import * as SecureStore from 'expo-secure-store';
@@ -23,6 +23,15 @@ const USERID_KEY = 'kugou_userid';
 type Tab = 'search' | 'library';
 
 export default function App() {
+  return (
+    <SafeAreaProvider>
+      <MainApp />
+    </SafeAreaProvider>
+  );
+}
+
+function MainApp() {
+  const insets = useSafeAreaInsets();
   const player = usePlayer();
   const [playerVisible, setPlayerVisible] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
@@ -68,26 +77,28 @@ export default function App() {
     player.play(song, queue);
   };
 
-  if (loading) return <SafeAreaProvider><View style={styles.container} /></SafeAreaProvider>;
+  if (loading) return <View style={styles.container} />;
 
   if (!loggedIn) {
     return (
-      <SafeAreaProvider><View style={styles.container}>
+      <View style={styles.container}>
         <StatusBar style="light" />
         <LoginScreen onLogin={handleLogin} />
-      </View></SafeAreaProvider>
+      </View>
     );
   }
 
   return (
-    <SafeAreaProvider><View style={styles.container}>
+    <View style={styles.container}>
       <StatusBar style="light" />
 
-      <View style={[styles.content, tab !== 'search' && { display: 'none' }]}>
-        <SearchScreen onPlay={handlePlay} currentHash={player.current?.hash} />
-      </View>
-      <View style={[styles.content, tab !== 'library' && { display: 'none' }]}>
-        <LibraryScreen onPlay={handlePlay} currentHash={player.current?.hash} currentAlbumAudioId={player.current?.albumAudioId || player.current?.mixSongId} />
+      <View style={styles.content}>
+        <View style={[styles.content, tab !== 'search' && styles.hidden]}>
+          <SearchScreen onPlay={handlePlay} currentHash={player.current?.hash} />
+        </View>
+        <View style={[styles.content, tab !== 'library' && styles.hidden]}>
+          <LibraryScreen onPlay={handlePlay} currentHash={player.current?.hash} currentAlbumAudioId={player.current?.albumAudioId || player.current?.mixSongId} />
+        </View>
       </View>
 
       <MiniPlayer
@@ -103,13 +114,13 @@ export default function App() {
         onNext={player.next}
       />
 
-      <View style={styles.tabBar}>
-        <TouchableOpacity style={styles.tabItem} onPress={() => setTab('search')} activeOpacity={0.6}>
-          <Ionicons name="search" size={22} color={tab === 'search' ? colors.accent : colors.textTertiary} />
+      <View style={[styles.tabBar, { paddingBottom: Math.max(insets.bottom, 8) }]}>
+        <TouchableOpacity style={styles.tabItem} onPress={() => setTab('search')} activeOpacity={0.7}>
+          <Ionicons name="search" size={20} color={tab === 'search' ? colors.accent : colors.textTertiary} />
           <Text style={[styles.tabLabel, tab === 'search' && styles.tabLabelActive]}>搜索</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.tabItem} onPress={() => setTab('library')} activeOpacity={0.6}>
-          <Ionicons name="library-outline" size={22} color={tab === 'library' ? colors.accent : colors.textTertiary} />
+        <TouchableOpacity style={styles.tabItem} onPress={() => setTab('library')} activeOpacity={0.7}>
+          <Ionicons name="library-outline" size={20} color={tab === 'library' ? colors.accent : colors.textTertiary} />
           <Text style={[styles.tabLabel, tab === 'library' && styles.tabLabelActive]}>音乐库</Text>
         </TouchableOpacity>
       </View>
@@ -157,20 +168,20 @@ export default function App() {
           />
         )}
       </Modal>
-    </View></SafeAreaProvider>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   content: { flex: 1 },
+  hidden: { display: 'none' as const },
   tabBar: {
     flexDirection: 'row',
     backgroundColor: colors.surface,
-    borderTopWidth: 1,
+    borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: colors.border,
-    paddingBottom: 40,
-    paddingTop: 8,
+    paddingTop: 10,
   },
   tabItem: {
     flex: 1,

@@ -112,7 +112,7 @@ export function PlayerScreen({
         </View>
 
         <View style={styles.progressArea}>
-          <ProgressBar progress={progress} onSeek={(ratio) => onSeek(ratio * duration)} height={3} fillColor={colors.accent} />
+          <ProgressBar progress={progress} onSeek={(ratio) => onSeek(ratio * duration)} height={4} fillColor={colors.accent} />
           <View style={styles.timeRow}>
             <Text style={styles.time}>{formatTime(position)}</Text>
             <Text style={styles.time}>{formatTime(duration)}</Text>
@@ -199,24 +199,24 @@ const styles = StyleSheet.create({
   },
   climaxBtn: {
     borderWidth: 1,
-    borderColor: '#f9731640',
-    borderRadius: 4,
-    paddingHorizontal: 5,
-    paddingVertical: 2,
+    borderColor: 'rgba(249, 115, 22, 0.3)',
+    borderRadius: 6,
+    paddingHorizontal: 7,
+    paddingVertical: 3,
   },
   qBadge: {
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 4,
-    paddingHorizontal: 5,
-    paddingVertical: 2,
+    borderRadius: 6,
+    paddingHorizontal: 7,
+    paddingVertical: 3,
   },
   qBadgeActive: {
     borderColor: colors.accent,
     backgroundColor: colors.accent,
   },
   qText: {
-    fontSize: 9,
+    fontSize: 10,
     color: colors.textTertiary,
     fontWeight: '700',
   },
@@ -252,10 +252,10 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   playBtn: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: colors.text,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: colors.accent,
     justifyContent: 'center',
     alignItems: 'center',
   },

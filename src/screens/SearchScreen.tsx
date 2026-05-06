@@ -101,7 +101,8 @@ export function SearchScreen({ onPlay, currentHash }: Props) {
         <FlatList
           data={results}
           keyExtractor={(item) => item.hash}
-          contentContainerStyle={{ paddingBottom: 180 }}
+          contentContainerStyle={{ paddingBottom: 24 }}
+          ListEmptyComponent={!loading ? <Text style={styles.emptyText}>搜索你喜欢的音乐</Text> : null}
           renderItem={({ item }) => {
             const { artist, title } = parseName(item.fileName);
             const isPlaying = item.hash === currentHash;
@@ -174,4 +175,5 @@ const styles = StyleSheet.create({
   title: { fontSize: 16, color: colors.text, marginBottom: 2 },
   artist: { fontSize: 13, color: colors.textSecondary },
   duration: { fontSize: 13, color: colors.textTertiary, marginLeft: 12 },
+  emptyText: { fontSize: 15, color: colors.textTertiary, textAlign: 'center', marginTop: 80 },
 });
