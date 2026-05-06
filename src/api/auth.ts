@@ -24,7 +24,13 @@ export async function loginByCellphone(mobile: string, code: string): Promise<Lo
   };
 }
 
-export async function refreshToken(token: string, userid: string) {
+export async function refreshToken(token: string, userid: string): Promise<{ token: string; userid: string }> {
   const res = await api('/login/token', { token, userid });
-  return res;
+  if (res?.status !== 1 || !res?.data?.token) {
+    throw new Error('Token refresh failed');
+  }
+  return {
+    token: String(res.data.token),
+    userid: String(res.data.userid || userid),
+  };
 }

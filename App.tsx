@@ -44,7 +44,13 @@ export default function App() {
       if (token && userid) {
         setAuth(token, userid);
         setLoggedIn(true);
-        refreshToken(token, userid).catch(() => handleLogout());
+        refreshToken(token, userid)
+          .then(async (result) => {
+            await SecureStore.setItemAsync(TOKEN_KEY, result.token);
+            await SecureStore.setItemAsync(USERID_KEY, result.userid);
+            setAuth(result.token, result.userid);
+          })
+          .catch(() => handleLogout());
       }
       setLoading(false);
     })();

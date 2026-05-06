@@ -29,7 +29,9 @@ export async function api<T = any>(path: string, params: Record<string, string |
   const cleaned = text.replace(/<!--.*?-->/g, '');
   const data = JSON.parse(cleaned);
 
-  if (data?.error_code === 20028 || data?.errcode === 20028) {
+  const errCode = data?.error_code ?? data?.errcode;
+  if (errCode === 20028 || errCode === 20010 ||
+      (authCookie && data?.status === 0 && errCode != null)) {
     notifyAuthExpired();
     throw new AuthError('Token expired');
   }

@@ -77,7 +77,25 @@ For remote development (phone on different network):
 REACT_NATIVE_PACKAGER_HOSTNAME=<public-ip> npx expo start --port <port>
 ```
 
-### Build APK
+### Build APK (Local)
+
+```bash
+# Generate native Android project (first time only)
+npx expo prebuild --platform android --clean
+
+# Build release APK
+npm run build:android
+```
+
+The APK will be at `android/app/build/outputs/apk/release/app-release.apk`.
+
+Environment variables from `.env` are automatically loaded via `metro.config.js` + `dotenv` — no manual `export` needed.
+
+**Prerequisites**: Android SDK, NDK 27.1, and build-tools installed. Set `ANDROID_HOME` in your shell.
+
+### Build APK (Cloud)
+
+Alternatively, use Expo's cloud build service (requires free [Expo account](https://expo.dev)):
 
 ```bash
 npm install -g eas-cli
@@ -85,8 +103,6 @@ eas login
 eas secret:create --name EXPO_PUBLIC_API_BASE --value "http://your-api-host:3000"
 eas build --platform android --profile preview
 ```
-
-The APK will be available for download from the EAS dashboard.
 
 ## Tech Stack
 
