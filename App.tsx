@@ -82,7 +82,7 @@ function MainApp() {
   if (!loggedIn) {
     return (
       <View style={styles.container}>
-        <StatusBar style="light" />
+        <StatusBar style="dark" />
         <LoginScreen onLogin={handleLogin} />
       </View>
     );
@@ -90,7 +90,7 @@ function MainApp() {
 
   return (
     <View style={styles.container}>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
 
       <View style={styles.content}>
         <View style={[styles.content, tab !== 'search' && styles.hidden]}>

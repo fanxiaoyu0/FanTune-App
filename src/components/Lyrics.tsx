@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
   line: {
     fontSize: 16,
     lineHeight: LINE_HEIGHT,
-    color: '#5a5a72',
+    color: '#C0C0CC',
     textAlign: 'center',
     paddingHorizontal: 24,
   },

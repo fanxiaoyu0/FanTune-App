@@ -147,7 +147,7 @@ export function LibraryScreen({ onPlay, currentHash, currentAlbumAudioId }: Prop
         ) : (
           <>
             <TouchableOpacity style={styles.menuRow} onPress={openHistory} activeOpacity={0.6}>
-              <View style={[styles.menuIcon, { backgroundColor: '#1a1a2e' }]}>
+              <View style={[styles.menuIcon, { backgroundColor: colors.accentDim }]}>
                 <Ionicons name="time-outline" size={20} color={colors.accent} />
               </View>
               <Text style={styles.menuText}>最近播放</Text>
@@ -155,16 +155,16 @@ export function LibraryScreen({ onPlay, currentHash, currentAlbumAudioId }: Prop
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.menuRow} onPress={openAiRecommend} activeOpacity={0.6}>
-              <View style={[styles.menuIcon, { backgroundColor: '#1e1a30' }]}>
-                <Ionicons name="sparkles-outline" size={20} color="#a78bfa" />
+              <View style={[styles.menuIcon, { backgroundColor: 'rgba(167, 139, 250, 0.12)' }]}>
+                <Ionicons name="sparkles-outline" size={20} color="#8B5CF6" />
               </View>
               <Text style={styles.menuText}>猜你喜欢</Text>
               <Ionicons name="chevron-forward" size={18} color={colors.textTertiary} />
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.menuRow} onPress={() => openStyle()} activeOpacity={0.6}>
-              <View style={[styles.menuIcon, { backgroundColor: '#2a1a2a' }]}>
-                <Ionicons name="color-palette-outline" size={20} color="#c084fc" />
+              <View style={[styles.menuIcon, { backgroundColor: 'rgba(192, 132, 252, 0.12)' }]}>
+                <Ionicons name="color-palette-outline" size={20} color="#A855F7" />
               </View>
               <Text style={styles.menuText}>风格推荐</Text>
               <Ionicons name="chevron-forward" size={18} color={colors.textTertiary} />
@@ -187,9 +187,9 @@ export function LibraryScreen({ onPlay, currentHash, currentAlbumAudioId }: Prop
             {playlists.map(p => {
               const hue = Array.from(p.gcid).reduce((s, c) => s + c.charCodeAt(0), 0) % 60 + 240;
               return (
-              <TouchableOpacity key={p.gcid} style={styles.playlistRow} onPress={() => openPlaylist(p)} activeOpacity={0.6}>
-                <View style={[styles.playlistIcon, { backgroundColor: `hsl(${hue}, 30%, 18%)` }]}>
-                  <Text style={{ fontSize: 18, fontWeight: '700', color: `hsl(${hue}, 60%, 70%)` }}>{p.name.slice(0, 1)}</Text>
+              <TouchableOpacity key={p.gcid} style={styles.playlistRow} onPress={() => openPlaylist(p)} activeOpacity={0.7}>
+                <View style={[styles.playlistIcon, { backgroundColor: `hsl(${hue}, 40%, 92%)` }]}>
+                  <Text style={{ fontSize: 18, fontWeight: '700', color: `hsl(${hue}, 50%, 45%)` }}>{p.name.slice(0, 1)}</Text>
                 </View>
                 <View style={styles.playlistInfo}>
                   <Text style={styles.playlistName} numberOfLines={1}>{p.name}</Text>
