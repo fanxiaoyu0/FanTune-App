@@ -1,14 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions, BackHandler } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, BackHandler } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../theme/colors';
 import { ProgressBar } from '../components/ProgressBar';
 import { Lyrics } from '../components/Lyrics';
-import { Comments } from '../components/Comments';
 import { PlayState, PlayMode } from '../hooks/usePlayer';
 import { Song, LyricLine } from '../api/music';
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 interface Props {
   song: Song | null;
@@ -30,9 +27,13 @@ interface Props {
   onArtistPress?: (name: string) => void;
 }
 
-type PlayerTab = 'lyrics' | 'comments';
-
 const QUALITY_OPTIONS = ['128', '320', 'flac'] as const;
+
+const PLAY_MODE_CONFIG: Record<PlayMode, { icon: keyof typeof Ionicons.glyphMap }> = {
+  loop: { icon: 'repeat-outline' },
+  one: { icon: 'repeat-outline' },
+  shuffle: { icon: 'shuffle-outline' },
+};
 
 function formatTime(ms: number) {
   const totalSec = Math.floor(ms / 1000);
@@ -45,12 +46,6 @@ function parseName(fileName: string) {
   const parts = fileName.split(' - ');
   return { artist: parts[0] || '', title: parts[1] || fileName };
 }
-
-const PLAY_MODE_CONFIG: Record<PlayMode, { icon: keyof typeof Ionicons.glyphMap; label: string }> = {
-  loop: { icon: 'repeat-outline', label: '循环' },
-  one: { icon: 'repeat-outline', label: '单曲' },
-  shuffle: { icon: 'shuffle-outline', label: '随机' },
-};
 
 export function PlayerScreen({
   song, state, position, duration, lyrics, climax,
@@ -66,8 +61,6 @@ export function PlayerScreen({
     return () => handler.remove();
   }, [onClose]);
 
-  const [playerTab, setPlayerTab] = useState<PlayerTab>('lyrics');
-
   if (!song) return null;
 
   const { artist, title } = parseName(song.fileName);
@@ -76,107 +69,85 @@ export function PlayerScreen({
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.header} onPress={onClose} activeOpacity={0.6}>
-        <Ionicons name="chevron-down" size={28} color={colors.text} />
-      </TouchableOpacity>
-
-      <View style={styles.tabRow}>
-        <TouchableOpacity onPress={() => setPlayerTab('lyrics')} activeOpacity={0.6}>
-          <Text style={[styles.tabText, playerTab === 'lyrics' && styles.tabTextActive]}>歌词</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setPlayerTab('comments')} activeOpacity={0.6}>
-          <Text style={[styles.tabText, playerTab === 'comments' && styles.tabTextActive]}>评论</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.artworkArea}>
-        {playerTab === 'comments' && song.mixSongId ? (
-          <Comments mixSongId={song.mixSongId} />
-        ) : lyrics.length > 0 ? (
+      <View style={styles.lyricsArea}>
+        {lyrics.length > 0 ? (
           <Lyrics lyrics={lyrics} position={position} onSeek={(ms) => onSeek(ms)} />
         ) : (
-          <View style={styles.artwork}>
-            <Ionicons name="musical-notes" size={80} color={colors.textTertiary} />
+          <View style={styles.emptyLyrics}>
+            <Ionicons name="musical-notes" size={64} color={colors.textTertiary} />
           </View>
         )}
       </View>
 
-      <View style={styles.info}>
-        <Text style={styles.title} numberOfLines={1}>{title}</Text>
-        <TouchableOpacity onPress={() => onArtistPress?.(artist)} activeOpacity={0.6}>
-          <Text style={styles.artist} numberOfLines={1}>{artist}</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.badgeRow}>
-        {climax !== null && (
-          <TouchableOpacity
-            style={styles.climaxBtn}
-            onPress={() => onSeek(climax)}
-            activeOpacity={0.6}
-          >
-            <Ionicons name="flame-outline" size={13} color="#f97316" />
-            <Text style={styles.climaxText}>高潮</Text>
-          </TouchableOpacity>
-        )}
-      </View>
-
-      <View style={styles.qualityRow}>
-        {QUALITY_OPTIONS.map((q) => (
-          <TouchableOpacity
-            key={q}
-            style={[styles.qualityBadge, quality === q && styles.qualityBadgeActive]}
-            onPress={() => onSetQuality(q)}
-            activeOpacity={0.6}
-          >
-            <Text style={[styles.qualityText, quality === q && styles.qualityTextActive]}>
-              {q.toUpperCase()}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      <View style={styles.progressArea}>
-        <ProgressBar
-          progress={progress}
-          onSeek={(ratio) => onSeek(ratio * duration)}
-          height={4}
-        />
-        <View style={styles.timeRow}>
-          <Text style={styles.time}>{formatTime(position)}</Text>
-          <Text style={styles.time}>{formatTime(duration)}</Text>
+      <View style={styles.bottom}>
+        <View style={styles.songRow}>
+          <View style={styles.songInfo}>
+            <Text style={styles.title} numberOfLines={1}>{title}</Text>
+            <TouchableOpacity onPress={() => onArtistPress?.(artist)} activeOpacity={0.6}>
+              <Text style={styles.artist} numberOfLines={1}>{artist}</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.badges}>
+            {climax !== null && (
+              <TouchableOpacity style={styles.climaxBtn} onPress={() => onSeek(climax)} activeOpacity={0.6}>
+                <Ionicons name="flame-outline" size={12} color="#f97316" />
+              </TouchableOpacity>
+            )}
+            {QUALITY_OPTIONS.map((q) => (
+              <TouchableOpacity
+                key={q}
+                style={[styles.qBadge, quality === q && styles.qBadgeActive]}
+                onPress={() => onSetQuality(q)}
+                activeOpacity={0.6}
+              >
+                <Text style={[styles.qText, quality === q && styles.qTextActive]}>
+                  {q.toUpperCase()}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
-      </View>
 
-      <View style={styles.controls}>
-        <TouchableOpacity onPress={onTogglePlayMode} style={styles.sideBtn} activeOpacity={0.6}>
-          <Ionicons name={modeConfig.icon} size={22} color={colors.text} />
-          {playMode === 'one' && <Text style={styles.oneLabel}>1</Text>}
-        </TouchableOpacity>
+        <View style={styles.progressArea}>
+          <ProgressBar progress={progress} onSeek={(ratio) => onSeek(ratio * duration)} height={3} fillColor={colors.accent} />
+          <View style={styles.timeRow}>
+            <Text style={styles.time}>{formatTime(position)}</Text>
+            <Text style={styles.time}>{formatTime(duration)}</Text>
+          </View>
+        </View>
 
-        <TouchableOpacity onPress={onPrev} style={styles.ctrlBtn} activeOpacity={0.6}>
-          <Ionicons name="play-skip-back" size={28} color={colors.text} />
-        </TouchableOpacity>
+        <View style={styles.controls}>
+          <TouchableOpacity onPress={onTogglePlayMode} style={styles.sideBtn} activeOpacity={0.6}>
+            <Ionicons name={modeConfig.icon} size={22} color={colors.textSecondary} />
+            {playMode === 'one' && <Text style={styles.oneLabel}>1</Text>}
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          onPress={state === 'playing' ? onPause : onResume}
-          style={styles.playBtn}
-          activeOpacity={0.7}
-        >
-          {state === 'loading' ? (
-            <Ionicons name="hourglass-outline" size={32} color={colors.bg} />
-          ) : state === 'playing' ? (
-            <Ionicons name="pause" size={32} color={colors.bg} />
-          ) : (
-            <Ionicons name="play" size={32} color={colors.bg} />
-          )}
-        </TouchableOpacity>
+          <TouchableOpacity onPress={onPrev} style={styles.ctrlBtn} activeOpacity={0.6}>
+            <Ionicons name="play-skip-back" size={26} color={colors.text} />
+          </TouchableOpacity>
 
-        <TouchableOpacity onPress={onNext} style={styles.ctrlBtn} activeOpacity={0.6}>
-          <Ionicons name="play-skip-forward" size={28} color={colors.text} />
-        </TouchableOpacity>
+          <TouchableOpacity
+            onPress={state === 'playing' ? onPause : onResume}
+            style={styles.playBtn}
+            activeOpacity={0.7}
+          >
+            {state === 'loading' ? (
+              <Ionicons name="hourglass-outline" size={30} color={colors.bg} />
+            ) : state === 'playing' ? (
+              <Ionicons name="pause" size={30} color={colors.bg} />
+            ) : (
+              <Ionicons name="play" size={30} color={colors.bg} />
+            )}
+          </TouchableOpacity>
 
-        <View style={styles.sideBtn} />
+          <TouchableOpacity onPress={onNext} style={styles.ctrlBtn} activeOpacity={0.6}>
+            <Ionicons name="play-skip-forward" size={26} color={colors.text} />
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={onClose} style={styles.sideBtn} activeOpacity={0.6}>
+            <Ionicons name="chevron-down" size={22} color={colors.textSecondary} />
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -186,107 +157,83 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.bg,
-    paddingHorizontal: 32,
   },
-  header: {
+  lyricsArea: {
+    flex: 1,
     paddingTop: 56,
-    paddingBottom: 8,
-    alignItems: 'center',
   },
-  tabRow: {
-    flexDirection: 'row',
-    gap: 24,
-    paddingBottom: 8,
-  },
-  tabText: {
-    fontSize: 14,
-    color: colors.textTertiary,
-    fontWeight: '500',
-  },
-  tabTextActive: {
-    color: colors.text,
-  },
-  artworkArea: {
+  emptyLyrics: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  artwork: {
-    width: SCREEN_WIDTH - 120,
-    height: SCREEN_WIDTH - 120,
-    borderRadius: 16,
-    backgroundColor: colors.surface,
+  bottom: {
+    paddingHorizontal: 28,
+    paddingBottom: 40,
+  },
+  songRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  songInfo: {
+    flex: 1,
+    marginRight: 12,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: colors.text,
+    marginBottom: 4,
+  },
+  artist: {
+    fontSize: 14,
+    color: colors.textSecondary,
+  },
+  badges: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  climaxBtn: {
+    width: 26,
+    height: 22,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#f9731640',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  info: {
-    marginBottom: 8,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: '600',
-    color: colors.text,
-    marginBottom: 6,
-  },
-  artist: {
-    fontSize: 16,
-    color: colors.textSecondary,
-  },
-  badgeRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 8,
-  },
-  climaxBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    borderWidth: 1,
-    borderColor: '#f9731640',
-    borderRadius: 6,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-  },
-  climaxText: {
-    fontSize: 11,
-    color: '#f97316',
-    fontWeight: '600',
-  },
-  qualityRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 20,
-  },
-  qualityBadge: {
+  qBadge: {
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 6,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    borderRadius: 4,
+    paddingHorizontal: 5,
+    paddingVertical: 2,
   },
-  qualityBadgeActive: {
-    borderColor: colors.text,
-    backgroundColor: colors.text,
+  qBadgeActive: {
+    borderColor: colors.accent,
+    backgroundColor: colors.accent,
   },
-  qualityText: {
-    fontSize: 11,
-    color: colors.textSecondary,
-    fontWeight: '600',
-    letterSpacing: 0.5,
+  qText: {
+    fontSize: 9,
+    color: colors.textTertiary,
+    fontWeight: '700',
   },
-  qualityTextActive: {
+  qTextActive: {
     color: colors.bg,
   },
   progressArea: {
-    marginBottom: 24,
+    marginBottom: 20,
   },
   timeRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 4,
+    marginTop: 6,
   },
   time: {
-    fontSize: 12,
+    fontSize: 11,
     color: colors.textTertiary,
     fontVariant: ['tabular-nums'],
   },
@@ -294,11 +241,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingBottom: 48,
   },
   sideBtn: {
-    width: 40,
-    height: 40,
+    width: 36,
+    height: 36,
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
@@ -307,9 +253,9 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   playBtn: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 58,
+    height: 58,
+    borderRadius: 29,
     backgroundColor: colors.text,
     justifyContent: 'center',
     alignItems: 'center',
@@ -318,7 +264,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     fontSize: 8,
     fontWeight: '700',
-    color: colors.text,
+    color: colors.textSecondary,
     bottom: 4,
     right: 4,
   },

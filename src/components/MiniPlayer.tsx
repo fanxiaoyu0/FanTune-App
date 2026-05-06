@@ -44,7 +44,7 @@ export function MiniPlayer({ song, state, position, duration, lyrics, onPause, o
         progress={progress}
         onSeek={(ratio) => onSeek(ratio * duration)}
         height={2}
-        fillColor={colors.playing}
+        fillColor={colors.accent}
       />
       <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.8}>
         <View style={styles.info}>
@@ -88,10 +88,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 12,
+    paddingTop: 6,
+    paddingBottom: 8,
   },
   info: { flex: 1 },
-  title: { fontSize: 15, color: colors.text, fontWeight: '500' },
-  lyric: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
+  title: { fontSize: 14, color: colors.text, fontWeight: '500' },
+  lyric: { fontSize: 11, color: colors.textSecondary, marginTop: 1 },
   btn: { padding: 8 },
 });

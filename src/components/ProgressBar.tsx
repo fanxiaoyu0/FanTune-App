@@ -81,11 +81,11 @@ const styles = StyleSheet.create({
   },
   thumb: {
     position: 'absolute',
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: colors.text,
-    marginLeft: -8,
-    top: -6,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: colors.accent,
+    marginLeft: -7,
+    top: -5,
   },
 });

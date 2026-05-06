@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { Audio } from 'expo-av';
 import { Song, LyricLine, getSongUrl, getLyric, getSongClimax, submitPlayHistory } from '../api/music';
+import { getCachedAudioUri } from '../api/audioCache';
 
 export type PlayState = 'idle' | 'loading' | 'playing' | 'paused';
 export type PlayMode = 'loop' | 'one' | 'shuffle';
@@ -46,8 +47,10 @@ export function usePlayer() {
       playsInSilentModeIOS: true,
     });
 
+    const audioUri = await getCachedAudioUri(song.hash, q || quality, songUrl.url);
+
     const { sound } = await Audio.Sound.createAsync(
-      { uri: songUrl.url },
+      { uri: audioUri },
       { shouldPlay: true, progressUpdateIntervalMillis: 500 },
       (status) => {
         if (!status.isLoaded) return;
@@ -185,14 +188,10 @@ export function usePlayer() {
     if (!songUrl) return;
 
     await Audio.setAudioModeAsync({ staysActiveInBackground: true, playsInSilentModeIOS: true });
-    if (oldSound) {
-      const freshStatus = await oldSound.getStatusAsync();
-      if (freshStatus.isLoaded) currentPos = freshStatus.positionMillis;
-    }
 
     const { sound: newSound } = await Audio.Sound.createAsync(
       { uri: songUrl.url },
-      { shouldPlay: true, positionMillis: currentPos, progressUpdateIntervalMillis: 500 },
+      { shouldPlay: true, positionMillis: currentPos + 800, progressUpdateIntervalMillis: 500 },
       (status) => {
         if (!status.isLoaded) return;
         setPosition(status.positionMillis);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, FlatList, TouchableOpacity, ScrollView, StyleSheet, ActivityIndicator, BackHandler } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../theme/colors';
@@ -18,6 +18,7 @@ export function LibraryScreen({ onPlay, currentHash }: Props) {
   const [tracks, setTracks] = useState<Song[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingTracks, setLoadingTracks] = useState(false);
+  const trackCache = useRef<Record<string, Song[]>>({});
 
   useEffect(() => {
     Promise.all([
@@ -28,8 +29,14 @@ export function LibraryScreen({ onPlay, currentHash }: Props) {
 
   const openPlaylist = async (p: Playlist) => {
     setSubPage({ type: 'playlist', playlist: p });
+    if (trackCache.current[p.gcid]) {
+      setTracks(trackCache.current[p.gcid]);
+      return;
+    }
     setLoadingTracks(true);
-    setTracks(await getPlaylistTracks(p.gcid));
+    const t = await getPlaylistTracks(p.gcid);
+    trackCache.current[p.gcid] = t;
+    setTracks(t);
     setLoadingTracks(false);
   };
 

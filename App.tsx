@@ -26,7 +26,7 @@ export default function App() {
   const [playerVisible, setPlayerVisible] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<Tab>('search');
+  const [tab, setTab] = useState<Tab>('library');
   const [artistName, setArtistName] = useState<string | null>(null);
 
   const handleLogout = async () => {
@@ -76,12 +76,11 @@ export default function App() {
     <View style={styles.container}>
       <StatusBar style="light" />
 
-      <View style={styles.content}>
-        {tab === 'search' ? (
-          <SearchScreen onPlay={handlePlay} currentHash={player.current?.hash} />
-        ) : (
-          <LibraryScreen onPlay={handlePlay} currentHash={player.current?.hash} />
-        )}
+      <View style={[styles.content, tab !== 'search' && { display: 'none' }]}>
+        <SearchScreen onPlay={handlePlay} currentHash={player.current?.hash} />
+      </View>
+      <View style={[styles.content, tab !== 'library' && { display: 'none' }]}>
+        <LibraryScreen onPlay={handlePlay} currentHash={player.current?.hash} />
       </View>
 
       <MiniPlayer
@@ -99,11 +98,11 @@ export default function App() {
 
       <View style={styles.tabBar}>
         <TouchableOpacity style={styles.tabItem} onPress={() => setTab('search')} activeOpacity={0.6}>
-          <Ionicons name="search" size={22} color={tab === 'search' ? colors.text : colors.textTertiary} />
+          <Ionicons name="search" size={22} color={tab === 'search' ? colors.accent : colors.textTertiary} />
           <Text style={[styles.tabLabel, tab === 'search' && styles.tabLabelActive]}>搜索</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.tabItem} onPress={() => setTab('library')} activeOpacity={0.6}>
-          <Ionicons name="library-outline" size={22} color={tab === 'library' ? colors.text : colors.textTertiary} />
+          <Ionicons name="library-outline" size={22} color={tab === 'library' ? colors.accent : colors.textTertiary} />
           <Text style={[styles.tabLabel, tab === 'library' && styles.tabLabelActive]}>音乐库</Text>
         </TouchableOpacity>
       </View>
@@ -132,7 +131,7 @@ export default function App() {
           onTogglePlayMode={player.togglePlayMode}
           onSetQuality={player.setQuality}
           onClose={() => setPlayerVisible(false)}
-          onArtistPress={(name) => { setPlayerVisible(false); setArtistName(name); }}
+          onArtistPress={(name) => { setPlayerVisible(false); setTimeout(() => setArtistName(name), 300); }}
         />
       </Modal>
       <Modal
@@ -140,13 +139,13 @@ export default function App() {
         animationType="slide"
         presentationStyle="fullScreen"
         statusBarTranslucent
-        onRequestClose={() => setArtistName(null)}
+        onRequestClose={() => { setArtistName(null); setPlayerVisible(true); }}
       >
         {artistName && (
           <ArtistScreen
             artistName={artistName}
             onPlay={handlePlay}
-            onClose={() => setArtistName(null)}
+            onClose={() => { setArtistName(null); setPlayerVisible(true); }}
             currentHash={player.current?.hash}
           />
         )}
@@ -176,6 +175,6 @@ const styles = StyleSheet.create({
     color: colors.textTertiary,
   },
   tabLabelActive: {
-    color: colors.text,
+    color: colors.accent,
   },
 });

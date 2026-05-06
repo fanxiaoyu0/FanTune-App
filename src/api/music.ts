@@ -194,15 +194,19 @@ export async function searchArtist(name: string): Promise<Artist | null> {
 
 export async function getArtistSongs(id: number, page = 1): Promise<Song[]> {
   const res = await api('/artist/audios', { id, page, pagesize: 30, sort: 'hot' });
-  const songs = res?.data?.info || [];
-  return songs.map((s: any) => ({
-    hash: s.hash || '',
-    fileName: s.filename || '',
-    albumAudioId: String(s.album_audio_id || ''),
-    duration: s.duration || 0,
-    albumId: String(s.album_id || ''),
-    imgUrl: '',
-  }));
+  const songs = Array.isArray(res?.data) ? res.data : (res?.data?.info || []);
+  return songs.map((s: any) => {
+    const name = s.audio_name || s.songname || s.filename || '';
+    const singer = s.author_name || '';
+    return {
+      hash: s.hash || '',
+      fileName: singer && name ? `${singer} - ${name}` : name,
+      albumAudioId: String(s.album_audio_id || ''),
+      duration: s.duration || 0,
+      albumId: String(s.album_id || ''),
+      imgUrl: '',
+    };
+  });
 }
 
 export async function getAlbumSongs(albumId: string): Promise<{ name: string; songs: Song[] }> {
@@ -220,29 +224,6 @@ export async function getAlbumSongs(albumId: string): Promise<{ name: string; so
       duration: s.duration || 0,
       albumId: albumId,
       imgUrl: '',
-    })),
-  };
-}
-
-export interface Comment {
-  id: string;
-  userName: string;
-  content: string;
-  likeCount: number;
-  time: string;
-}
-
-export async function getSongComments(mixsongid: string, page = 1): Promise<{ total: number; comments: Comment[] }> {
-  const res = await api('/comment/music', { mixsongid, page, pagesize: 30 });
-  const list = res?.list || [];
-  return {
-    total: res?.count || 0,
-    comments: list.map((c: any) => ({
-      id: String(c.id || c.tid || ''),
-      userName: c.user_name || '',
-      content: c.content || '',
-      likeCount: c.like?.count || 0,
-      time: c.addtime || '',
     })),
   };
 }
